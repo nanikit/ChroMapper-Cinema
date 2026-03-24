@@ -65,4 +65,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\Icon.png" />
   </ItemGroup>
+  <Target Name="CopyToPlugins" AfterTargets="Build" Condition="'$(ChroMapperDir)' != ''">
+    <Message Importance="high" Text="Copying $(TargetFileName) to $(ChroMapperDir)\Plugins" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ChroMapperDir)\Plugins" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ChroMapperDir)\..\Plugins" />
+  </Target>
 </Project>
