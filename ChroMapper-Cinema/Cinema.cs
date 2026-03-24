@@ -71,7 +71,7 @@ public class Cinema {
 		
 		LoadVideo();
 		
-		atsc.TimeChanged += Update;
+		atsc.OnTimeChanged += Update;
 		Settings.NotifyBySettingName("SongSpeed", UpdateSongSpeed);
 	}
 	

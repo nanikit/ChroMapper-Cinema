@@ -18,12 +18,13 @@ public class Plugin {
 			$"[Cinema] Plugin assembly loaded: name='{assemblyName.Name}', version='{assemblyName.Version}', " +
 			$"informationalVersion='{informationalVersion}', mvid='{moduleVersionId}', location='{assembly.Location}'");
 		controller = new Cinema();
-		
-		LoadInitialMap.PlatformLoadedEvent += PlatformLoaded;
+
+		LoadInitialMap.OnLevelLoaded += LevelLoaded;
 	}
-	
-	private void PlatformLoaded(PlatformDescriptor descriptor) {
-		var atsc = Object.FindObjectOfType<AudioTimeSyncController>();
+
+	private void LevelLoaded() {
+		var atsc = Object.FindAnyObjectByType<AudioTimeSyncController>();
+		var descriptor = Object.FindAnyObjectByType<EnvironmentDescriptor>();
 		controller.Init(atsc, descriptor.gameObject);
 	}
 
