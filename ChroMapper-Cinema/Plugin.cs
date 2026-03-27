@@ -1,15 +1,22 @@
-﻿using UnityEngine;
-using UnityEngine.SceneManagement;
+using System.Reflection;
+using UnityEngine;
 
-namespace ChroMapper_Cinema {
+namespace ChroMapper_Cinema;
 
 [Plugin("Cinema")]
 public class Plugin {
 	public static Cinema controller;
-	
+
 	[Init]
 	private void Init() {
-		Debug.Log("Cinema Plugin has loaded!");
+		var assembly = typeof(Plugin).Assembly;
+		var assemblyName = assembly.GetName();
+		var informationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "null";
+		var moduleVersionId = assembly.ManifestModule.ModuleVersionId;
+
+		Debug.Log(
+			$"[Cinema] Plugin assembly loaded: name='{assemblyName.Name}', version='{assemblyName.Version}', " +
+			$"informationalVersion='{informationalVersion}', mvid='{moduleVersionId}', location='{assembly.Location}'");
 		controller = new Cinema();
 		
 		LoadInitialMap.PlatformLoadedEvent += PlatformLoaded;
@@ -19,11 +26,9 @@ public class Plugin {
 		var atsc = Object.FindObjectOfType<AudioTimeSyncController>();
 		controller.Init(atsc, descriptor.gameObject);
 	}
-	
+
 	[Exit]
 	private void Exit() {
-		
-	}
-}
 
+	}
 }
