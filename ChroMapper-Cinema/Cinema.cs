@@ -1,5 +1,4 @@
 using System.IO;
-using System.Reflection;
 using UnityEngine;
 using UnityEngine.Video;
 using SimpleJSON;
@@ -16,6 +15,9 @@ public class Cinema {
 	private VideoPlayer player;
 	private string platform = Options.default_key;
 	private PlatformSettings plat_settings;
+	private CustomBloom disabledCustomBloomSettings;
+	private bool disabledCustomBloomPreviousActive;
+	private bool disabledCustomBloomPreviousEnabledValue;
 	
 	private float offset;
 	private bool playing;
@@ -54,6 +56,7 @@ public class Cinema {
 		player.errorReceived += (VideoPlayer p, string msg) => {
 			enabled = false;
 			screen.SetActive(false);
+			RestoreCustomBloom();
 			throw new System.Exception(msg);
 		};
 		player.prepareCompleted += (VideoPlayer p) => {
@@ -111,10 +114,12 @@ public class Cinema {
 		}
 		
 		if (!File.Exists(videoPath)) {
+			RestoreCustomBloom();
 			return Utils.Error("Video file not downloaded!");
 		}
 		
 		screen.SetActive(true);
+		DisableCustomBloomForCinema();
 		
 		player.url = videoPath;
 		player.Prepare();
@@ -127,6 +132,7 @@ public class Cinema {
 			player.Stop();
 			screen.SetActive(false);
 			enabled = false;
+			RestoreCustomBloom();
 		}
 		else {
 			string err = LoadVideo();
@@ -167,6 +173,30 @@ public class Cinema {
 		if (!playing) {
 			player.StepForward();
 		}
+	}
+
+	private void DisableCustomBloomForCinema() {
+		var postProcessController = Object.FindAnyObjectByType<PostProcessingController>();
+		var profile = postProcessController?.volume?.profile;
+		if (profile?.TryGetSettings(out CustomBloom bloom) != true) return;
+		if (bloom == disabledCustomBloomSettings) return;
+
+		RestoreCustomBloom();
+		disabledCustomBloomSettings = bloom;
+		disabledCustomBloomPreviousActive = bloom.active;
+		disabledCustomBloomPreviousEnabledValue = bloom.enabled.value;
+		bloom.active = false;
+		bloom.enabled.value = false;
+
+		Debug.Log("[Cinema] Disabled CustomBloom effect for cinema");
+	}
+
+	private void RestoreCustomBloom() {
+		if (disabledCustomBloomSettings == null) return;
+
+		disabledCustomBloomSettings.active = disabledCustomBloomPreviousActive;
+		disabledCustomBloomSettings.enabled.value = disabledCustomBloomPreviousEnabledValue;
+		disabledCustomBloomSettings = null;
 	}
 }
 

@@ -25,11 +25,13 @@ public class Plugin {
 	private void LevelLoaded() {
 		var atsc = Object.FindAnyObjectByType<AudioTimeSyncController>();
 		var descriptor = Object.FindAnyObjectByType<EnvironmentDescriptor>();
+		if (controller == null || atsc == null || descriptor == null) return;
+
 		controller.Init(atsc, descriptor.gameObject);
 	}
 
 	[Exit]
 	private void Exit() {
-
+		LoadInitialMap.OnLevelLoaded -= LevelLoaded;
 	}
 }
